@@ -1,5 +1,6 @@
 /*
- Evolving Waves
+ Evolving Waves - accel/ deccel
+
 */
 
 
@@ -10,10 +11,7 @@ let showGraphs;
 let dur;
 let counter;
 
-function preload()
-{
-
-}
+let ranges;
 
 
 function setup()
@@ -32,18 +30,32 @@ function setup()
   line = new ShiftLine(vertices);
   sineGen = new SineGen(1,100,0);
 
-  data = calcSineEnv(100,0,PI,1,1.5);
+
 
   envs = {};
+  ranges = {};
+  //amp
 
+  data  = calcSineEnv(100,0,PI,1,1,1);
   envs['amp'] = new EnvelopeData(data);
+  ranges['amp'] = {min: 0, max: 75};
 
-  data = calcLinEnv(100,[0,1,0],[0.5,0.5])
-
+  //inc
+  data  = calcSineEnv(100,0,PI,1,1.5,1);
   envs['inc'] = new EnvelopeData(data);
+  ranges['inc'] = {min: PI/500, max: PI/25};
+
+  //freq
+  data  = calcSineEnv(100,0,PI,1,1,1.5);
+  envs['freq'] = new EnvelopeData(data);
+  ranges['freq'] = {min: 0.001, max: 0.25};
+
 
   dur = 20;
   counter = 0;
+
+
+
 
 }
 
@@ -53,12 +65,10 @@ function draw()
   noFill();
 
   let p = (((millis()-counter)/1000)%dur)/dur;
-  t = envs.amp.lin_value(p);
 
-  sineGen.amp = t * 100;
-  sineGen.freq =  map(t,0,1,0.001,0.25);
-
-  let inc = map(envs.inc.lin_value(p), 0,1,PI/500,PI/50);
+  sineGen.amp = map( envs.amp.lin_value(p), 0,1,ranges['amp'].min, ranges['amp'].max);
+  sineGen.freq =  map(envs.freq.lin_value(p), 0,1,ranges['freq'].min, ranges['freq'].max);
+  let inc = map(envs.inc.lin_value(p), 0,1,ranges['inc'].min, ranges['inc'].max);
   sineGen.update(inc);
 
 
@@ -77,12 +87,15 @@ function draw()
 
   if(showGraphs)
   {
+
+    randomSeed(0);
     let k = Object.keys(envs);
 
     for(let j = 0; j < k.length; j++)
     {
+
       //draw the envelope
-      stroke(255,0,0);
+      stroke(random(0,255),random(0,255),random(0,255));
       noFill();
       beginShape();
       for(let i = 0; i < 100; i++)

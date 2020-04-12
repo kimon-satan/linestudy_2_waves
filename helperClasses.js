@@ -331,7 +331,7 @@ class OnePole2
 ////////////////////////////////// HELPER FUNCTIONS ////////////////////////
 
 // Sine curves
-function calcSineEnv(numPoints,start,end,mul=1,power=1)
+function calcSineEnv(numPoints,start,end,mul=1,power=1,skew=1)
 {
   //calculates a portion of a sine function as an envelope
 
@@ -340,7 +340,9 @@ function calcSineEnv(numPoints,start,end,mul=1,power=1)
 
   for(let i = 0; i < numPoints; i++)
   {
-    let v = sin(start + i * r/numPoints) * mul;
+    let t = i/numPoints;
+    t = pow(t,skew);
+    let v = sin(start + t * r) * mul;
     d.push(v*abs(pow(v,power)));
   }
 
@@ -364,18 +366,20 @@ function calcLinEnv(numPoints, values, durations, interpolation)
         let t = j/durations[i];
         let va = values[i];
         let vb = values[i+1];
-        let v = lerp(va,vb,t);
+
 
         let i_type = (Array.isArray(interpolation)) ? interpolation[i] : interpolation;
 
         if(typeof(i_type) == "number")
         {
-          v = pow(v,i_type);
+          t = pow(t,i_type);
         }
         else if(i_type == "sine")
         {
 
         }
+
+        let v = lerp(va,vb,t);
 
         d.push(v);
       }
